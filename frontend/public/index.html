@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda - Gestión de Inventario</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- LOGIN -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h1>Tienda GT</h1>
+            <p>Sistema de Gestión de Inventario y Ventas</p>
+            <div class="form-group">
+                <label>Usuario</label>
+                <input type="text" id="username" placeholder="Ingresa tu usuario">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" placeholder="Ingresa tu contraseña">
+            </div>
+            <div id="login-error" class="error-msg hidden"></div>
+            <button onclick="login()">Iniciar Sesión</button>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div id="app" class="hidden">
+
+        <!-- NAVBAR -->
+        <nav>
+            <div class="nav-brand">Tienda GT</div>
+            <div class="nav-links">
+                <a onclick="showSection('productos')">Productos</a>
+                <a onclick="showSection('clientes')">Clientes</a>
+                <a onclick="showSection('ventas')">Ventas</a>
+                <a onclick="showSection('reportes')">Reportes</a>
+            </div>
+            <div class="nav-user">
+                <span id="nav-username"></span>
+                <button onclick="logout()">Cerrar Sesión</button>
+            </div>
+        </nav>
+
+        <!-- CONTENIDO -->
+        <main>
+            <div id="section-productos" class="section hidden"></div>
+            <div id="section-clientes" class="section hidden"></div>
+            <div id="section-ventas" class="section hidden"></div>
+            <div id="section-reportes" class="section hidden"></div>
+        </main>
+
+    </div>
+
+    <script src="app.js"></script>
+    <script src="productos.js"></script>
+    <script src="clientes.js"></script>
+    <script src="ventas.js"></script>
+    <script src="reportes.js"></script>
+</body>
+</html>
