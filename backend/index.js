@@ -13,12 +13,18 @@ const productosRoutes = require('./src/routes/productos');
 const clientesRoutes = require('./src/routes/clientes');
 const ventasRoutes = require('./src/routes/ventas');
 const reportesRoutes = require('./src/routes/reportes');
+const categoriasRoutes = require('./src/routes/categorias');
+const proveedoresRoutes = require('./src/routes/proveedores');
+const empleadosRoutes = require('./src/routes/empleados');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/productos', productosRoutes);
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/ventas', ventasRoutes);
 app.use('/api/reportes', reportesRoutes);
+app.use('/api/categorias', categoriasRoutes);
+app.use('/api/proveedores', proveedoresRoutes);
+app.use('/api/empleados', empleadosRoutes);
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {
