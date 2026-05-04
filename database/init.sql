@@ -75,3 +75,14 @@ CREATE TABLE IF NOT EXISTS detalle_venta (
     FOREIGN KEY (id_venta) REFERENCES venta(id_venta),
     FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
 );
+
+-- View resumen de ventas por cliente
+CREATE OR REPLACE VIEW resumen_ventas AS
+SELECT c.nombre AS cliente,
+       COUNT(v.id_venta) AS total_compras,
+       SUM(v.total) AS total_gastado,
+       MAX(v.fecha) AS ultima_compra
+FROM venta v
+JOIN cliente c ON v.id_cliente = c.id_cliente
+GROUP BY c.nombre
+ORDER BY total_gastado DESC;
