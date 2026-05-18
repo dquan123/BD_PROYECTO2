@@ -1,13 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
-
-// ============================================================
-// JOINs MÚLTIPLES
-// ============================================================
+const { verificarToken, verificarRol } = require('../middleware/auth');
 
 // JOIN 1: Ventas con cliente, empleado y detalle de productos
-router.get('/ventas-detalle', async (req, res) => {
+router.get('/ventas-detalle', verificarToken, verificarRol('admin', 'gerente'), async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT v.id_venta, v.fecha, v.total,
@@ -31,7 +28,7 @@ router.get('/ventas-detalle', async (req, res) => {
 });
 
 // JOIN 2: Productos con categoria y proveedor
-router.get('/productos-detalle', async (req, res) => {
+router.get('/productos-detalle', verificarToken, verificarRol('admin', 'gerente', 'bodeguero'), async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT p.nombre AS producto,
@@ -53,7 +50,7 @@ router.get('/productos-detalle', async (req, res) => {
 });
 
 // JOIN 3: Empleados con su usuario asociado
-router.get('/empleados-usuarios', async (req, res) => {
+router.get('/empleados-usuarios', verificarToken, verificarRol('admin'), async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT e.id_empleado, e.nombre AS empleado,
@@ -70,12 +67,8 @@ router.get('/empleados-usuarios', async (req, res) => {
     }
 });
 
-// ============================================================
-// SUBQUERIES
-// ============================================================
-
-// SUBQUERY 1: Clientes que han realizado al menos una venta (IN)
-router.get('/clientes-con-ventas', async (req, res) => {
+// SUBQUERY 1: Clientes con ventas (IN)
+router.get('/clientes-con-ventas', verificarToken, verificarRol('admin', 'gerente', 'vendedor'), async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT id_cliente, nombre, email, telefono
@@ -92,8 +85,8 @@ router.get('/clientes-con-ventas', async (req, res) => {
     }
 });
 
-// SUBQUERY 2: Productos con stock por debajo del promedio (subquery en FROM)
-router.get('/productos-bajo-stock', async (req, res) => {
+// SUBQUERY 2: Productos bajo stock promedio
+router.get('/productos-bajo-stock', verificarToken, verificarRol('admin', 'gerente', 'bodeguero'), async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT p.nombre, p.stock, p.precio_unitario, c.nombre AS categoria
@@ -111,12 +104,8 @@ router.get('/productos-bajo-stock', async (req, res) => {
     }
 });
 
-// ============================================================
-// GROUP BY, HAVING y AGREGACIÓN
-// ============================================================
-
-// Ventas por empleado con total recaudado, solo los que superan Q500
-router.get('/ventas-por-empleado', async (req, res) => {
+// GROUP BY, HAVING y agregación
+router.get('/ventas-por-empleado', verificarToken, verificarRol('admin', 'gerente'), async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT e.nombre AS empleado,
@@ -136,12 +125,8 @@ router.get('/ventas-por-empleado', async (req, res) => {
     }
 });
 
-// ============================================================
-// CTE (WITH)
-// ============================================================
-
-// Top 5 productos más vendidos usando CTE
-router.get('/top-productos', async (req, res) => {
+// CTE: Top 5 productos más vendidos
+router.get('/top-productos', verificarToken, verificarRol('admin', 'gerente'), async (req, res) => {
     try {
         const result = await pool.query(`
             WITH ventas_por_producto AS (
@@ -164,16 +149,10 @@ router.get('/top-productos', async (req, res) => {
     }
 });
 
-// ============================================================
-// VIEW
-// ============================================================
-
-// Endpoint que consume el view resumen_ventas
-router.get('/resumen-ventas', async (req, res) => {
+// VIEW: resumen ventas por cliente
+router.get('/resumen-ventas', verificarToken, verificarRol('admin', 'gerente'), async (req, res) => {
     try {
-        const result = await pool.query(`
-            SELECT * FROM resumen_ventas
-        `);
+        const result = await pool.query(`SELECT * FROM resumen_ventas`);
         res.json(result.rows);
     } catch (err) {
         console.error(err);

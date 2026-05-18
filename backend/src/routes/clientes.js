@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { verificarToken, verificarRol } = require('../middleware/auth');
 
-// GET todos los clientes
-router.get('/', async (req, res) => {
+// GET todos los clientes - todos los roles pueden ver
+router.get('/', verificarToken, async (req, res) => {
     try {
         const result = await pool.query(
             'SELECT * FROM cliente ORDER BY id_cliente'
@@ -15,8 +16,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET un cliente por ID
-router.get('/:id', async (req, res) => {
+// GET un cliente por ID - todos los roles pueden ver
+router.get('/:id', verificarToken, async (req, res) => {
     try {
         const result = await pool.query(
             'SELECT * FROM cliente WHERE id_cliente = $1',
@@ -32,8 +33,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST crear cliente
-router.post('/', async (req, res) => {
+// POST crear cliente - solo admin y gerente
+router.post('/', verificarToken, verificarRol('admin', 'gerente'), async (req, res) => {
     const { nombre, telefono, email, direccion } = req.body;
     if (!nombre || !telefono || !email || !direccion) {
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
@@ -51,8 +52,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT editar cliente
-router.put('/:id', async (req, res) => {
+// PUT editar cliente - solo admin y gerente
+router.put('/:id', verificarToken, verificarRol('admin', 'gerente'), async (req, res) => {
     const { nombre, telefono, email, direccion } = req.body;
     if (!nombre || !telefono || !email || !direccion) {
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
@@ -74,8 +75,8 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE eliminar cliente
-router.delete('/:id', async (req, res) => {
+// DELETE eliminar cliente - solo admin
+router.delete('/:id', verificarToken, verificarRol('admin'), async (req, res) => {
     try {
         const result = await pool.query(
             'DELETE FROM cliente WHERE id_cliente=$1 RETURNING *',

@@ -1,11 +1,15 @@
 async function loadProductos() {
+    const rol = getRol();
+    const puedeEditar = ['admin', 'gerente'].includes(rol);
+    const puedeEliminar = ['admin'].includes(rol);
+
     const section = document.getElementById('section-productos');
     section.innerHTML = `
         <h2>Productos</h2>
         <div class="card">
             <div class="toolbar">
                 <span id="productos-count"></span>
-                <button class="btn-success" onclick="abrirModalProducto()">+ Nuevo Producto</button>
+                ${puedeEditar ? '<button class="btn-success" onclick="abrirModalProducto()">+ Nuevo Producto</button>' : ''}
             </div>
             <div id="productos-msg"></div>
             <div class="table-container">
@@ -18,13 +22,14 @@ async function loadProductos() {
                             <th>Proveedor</th>
                             <th>Precio</th>
                             <th>Stock</th>
-                            <th>Acciones</th>
+                            ${puedeEditar ? '<th>Acciones</th>' : ''}
                         </tr>
                     </thead>
                     <tbody id="tabla-productos"></tbody>
                 </table>
             </div>
         </div>
+        ${puedeEditar ? `
         <div id="modal-producto" class="modal-overlay hidden">
             <div class="modal">
                 <h3 id="modal-producto-titulo">Nuevo Producto</h3>
@@ -59,13 +64,13 @@ async function loadProductos() {
                     <button class="btn-success" onclick="guardarProducto()">Guardar</button>
                 </div>
             </div>
-        </div>
+        </div>` : ''}
     `;
 
-    await fetchProductos();
+    await fetchProductos(puedeEditar, puedeEliminar);
 }
 
-async function fetchProductos() {
+async function fetchProductos(puedeEditar, puedeEliminar) {
     try {
         const res = await apiFetch('/productos');
         const productos = await res.json();
@@ -90,10 +95,11 @@ async function fetchProductos() {
                         ${p.stock}
                     </span>
                 </td>
+                ${puedeEditar ? `
                 <td>
                     <button class="btn-warning" onclick="editarProducto(${p.id_producto})">Editar</button>
-                    <button class="btn-danger" onclick="eliminarProducto(${p.id_producto}, '${p.nombre}')">Eliminar</button>
-                </td>
+                    ${puedeEliminar ? `<button class="btn-danger" onclick="eliminarProducto(${p.id_producto}, '${p.nombre}')">Eliminar</button>` : ''}
+                </td>` : ''}
             </tr>
         `).join('');
     } catch (err) {
@@ -191,7 +197,7 @@ async function guardarProducto() {
 
         cerrarModalProducto();
         showMsg('productos-msg', id ? 'Producto actualizado correctamente' : 'Producto creado correctamente', 'success');
-        await fetchProductos();
+        await fetchProductos(['admin', 'gerente'].includes(getRol()), getRol() === 'admin');
     } catch (err) {
         showMsg('modal-producto-msg', 'No se pudo conectar con el servidor');
     }
@@ -210,7 +216,7 @@ async function eliminarProducto(id, nombre) {
         }
 
         showMsg('productos-msg', 'Producto eliminado correctamente', 'success');
-        await fetchProductos();
+        await fetchProductos(['admin', 'gerente'].includes(getRol()), getRol() === 'admin');
     } catch (err) {
         showMsg('productos-msg', 'No se pudo conectar con el servidor');
     }

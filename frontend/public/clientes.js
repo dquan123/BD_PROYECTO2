@@ -1,11 +1,15 @@
 async function loadClientes() {
+    const rol = getRol();
+    const puedeEditar = ['admin', 'gerente'].includes(rol);
+    const puedeEliminar = ['admin'].includes(rol);
+
     const section = document.getElementById('section-clientes');
     section.innerHTML = `
         <h2>Clientes</h2>
         <div class="card">
             <div class="toolbar">
                 <span id="clientes-count"></span>
-                <button class="btn-success" onclick="abrirModalCliente()">+ Nuevo Cliente</button>
+                ${puedeEditar ? '<button class="btn-success" onclick="abrirModalCliente()">+ Nuevo Cliente</button>' : ''}
             </div>
             <div id="clientes-msg"></div>
             <div class="table-container">
@@ -17,13 +21,14 @@ async function loadClientes() {
                             <th>Teléfono</th>
                             <th>Email</th>
                             <th>Dirección</th>
-                            <th>Acciones</th>
+                            ${puedeEditar ? '<th>Acciones</th>' : ''}
                         </tr>
                     </thead>
                     <tbody id="tabla-clientes"></tbody>
                 </table>
             </div>
         </div>
+        ${puedeEditar ? `
         <div id="modal-cliente" class="modal-overlay hidden">
             <div class="modal">
                 <h3 id="modal-cliente-titulo">Nuevo Cliente</h3>
@@ -50,13 +55,13 @@ async function loadClientes() {
                     <button class="btn-success" onclick="guardarCliente()">Guardar</button>
                 </div>
             </div>
-        </div>
+        </div>` : ''}
     `;
 
-    await fetchClientes();
+    await fetchClientes(puedeEditar, puedeEliminar);
 }
 
-async function fetchClientes() {
+async function fetchClientes(puedeEditar, puedeEliminar) {
     try {
         const res = await apiFetch('/clientes');
         const clientes = await res.json();
@@ -76,10 +81,11 @@ async function fetchClientes() {
                 <td>${c.telefono}</td>
                 <td>${c.email}</td>
                 <td>${c.direccion}</td>
+                ${puedeEditar ? `
                 <td>
                     <button class="btn-warning" onclick="editarCliente(${c.id_cliente})">Editar</button>
-                    <button class="btn-danger" onclick="eliminarCliente(${c.id_cliente}, '${c.nombre}')">Eliminar</button>
-                </td>
+                    ${puedeEliminar ? `<button class="btn-danger" onclick="eliminarCliente(${c.id_cliente}, '${c.nombre}')">Eliminar</button>` : ''}
+                </td>` : ''}
             </tr>
         `).join('');
     } catch (err) {
@@ -151,7 +157,7 @@ async function guardarCliente() {
 
         cerrarModalCliente();
         showMsg('clientes-msg', id ? 'Cliente actualizado correctamente' : 'Cliente creado correctamente', 'success');
-        await fetchClientes();
+        await fetchClientes(['admin', 'gerente'].includes(getRol()), getRol() === 'admin');
     } catch (err) {
         showMsg('modal-cliente-msg', 'No se pudo conectar con el servidor');
     }
@@ -170,7 +176,7 @@ async function eliminarCliente(id, nombre) {
         }
 
         showMsg('clientes-msg', 'Cliente eliminado correctamente', 'success');
-        await fetchClientes();
+        await fetchClientes(['admin', 'gerente'].includes(getRol()), getRol() === 'admin');
     } catch (err) {
         showMsg('clientes-msg', 'No se pudo conectar con el servidor');
     }

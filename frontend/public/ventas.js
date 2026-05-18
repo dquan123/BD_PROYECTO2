@@ -1,11 +1,14 @@
 async function loadVentas() {
+    const rol = getRol();
+    const puedeCrear = ['admin', 'gerente', 'vendedor'].includes(rol);
+
     const section = document.getElementById('section-ventas');
     section.innerHTML = `
         <h2>Ventas</h2>
         <div class="card">
             <div class="toolbar">
                 <span id="ventas-count"></span>
-                <button class="btn-success" onclick="abrirModalVenta()">+ Nueva Venta</button>
+                ${puedeCrear ? '<button class="btn-success" onclick="abrirModalVenta()">+ Nueva Venta</button>' : ''}
             </div>
             <div id="ventas-msg"></div>
             <div class="table-container">
@@ -25,7 +28,7 @@ async function loadVentas() {
             </div>
         </div>
 
-        <!-- Modal nueva venta -->
+        ${puedeCrear ? `
         <div id="modal-venta" class="modal-overlay hidden">
             <div class="modal" style="max-width: 650px;">
                 <h3>Nueva Venta</h3>
@@ -67,9 +70,8 @@ async function loadVentas() {
                     <button class="btn-success" onclick="guardarVenta()">Registrar Venta</button>
                 </div>
             </div>
-        </div>
+        </div>` : ''}
 
-        <!-- Modal detalle venta -->
         <div id="modal-detalle" class="modal-overlay hidden">
             <div class="modal" style="max-width: 650px;">
                 <h3>Detalle de Venta</h3>

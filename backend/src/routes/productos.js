@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { verificarToken, verificarRol } = require('../middleware/auth');
 
-// GET todos los productos con JOIN a categoria y proveedor
-router.get('/', async (req, res) => {
+// GET todos los productos - todos los roles pueden ver
+router.get('/', verificarToken, async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT p.id_producto, p.nombre, p.descripcion, p.precio_unitario, p.stock,
@@ -20,8 +21,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET un producto por ID
-router.get('/:id', async (req, res) => {
+// GET un producto por ID - todos los roles pueden ver
+router.get('/:id', verificarToken, async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT p.id_producto, p.nombre, p.descripcion, p.precio_unitario, p.stock,
@@ -42,8 +43,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST crear producto
-router.post('/', async (req, res) => {
+// POST crear producto - solo admin y gerente
+router.post('/', verificarToken, verificarRol('admin', 'gerente'), async (req, res) => {
     const { nombre, descripcion, precio_unitario, stock, id_categoria, id_proveedor } = req.body;
     if (!nombre || !precio_unitario || !stock || !id_categoria || !id_proveedor) {
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
@@ -61,8 +62,8 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT editar producto
-router.put('/:id', async (req, res) => {
+// PUT editar producto - solo admin y gerente
+router.put('/:id', verificarToken, verificarRol('admin', 'gerente'), async (req, res) => {
     const { nombre, descripcion, precio_unitario, stock, id_categoria, id_proveedor } = req.body;
     if (!nombre || !precio_unitario || !stock || !id_categoria || !id_proveedor) {
         return res.status(400).json({ error: 'Faltan campos obligatorios' });
@@ -85,8 +86,8 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// DELETE eliminar producto
-router.delete('/:id', async (req, res) => {
+// DELETE eliminar producto - solo admin
+router.delete('/:id', verificarToken, verificarRol('admin'), async (req, res) => {
     try {
         const result = await pool.query(
             'DELETE FROM producto WHERE id_producto=$1 RETURNING *',

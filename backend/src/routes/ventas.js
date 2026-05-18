@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { verificarToken, verificarRol } = require('../middleware/auth');
 
-// GET todas las ventas con JOIN a cliente y empleado
-router.get('/', async (req, res) => {
+// GET todas las ventas - todos los roles pueden ver
+router.get('/', verificarToken, async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT v.id_venta, v.fecha, v.total,
@@ -21,8 +22,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET detalle de una venta con JOIN a producto
-router.get('/:id', async (req, res) => {
+// GET detalle de una venta - todos los roles pueden ver
+router.get('/:id', verificarToken, async (req, res) => {
     try {
         const venta = await pool.query(`
             SELECT v.id_venta, v.fecha, v.total,
@@ -53,8 +54,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// POST crear venta con transacción explícita
-router.post('/', async (req, res) => {
+// POST crear venta - admin, gerente y vendedor
+router.post('/', verificarToken, verificarRol('admin', 'gerente', 'vendedor'), async (req, res) => {
     const { id_cliente, id_empleado, detalle } = req.body;
 
     if (!id_cliente || !id_empleado || !detalle || detalle.length === 0) {
@@ -65,7 +66,6 @@ router.post('/', async (req, res) => {
     try {
         await client.query('BEGIN');
 
-        // Calcular total y verificar stock
         let total = 0;
         for (const item of detalle) {
             const producto = await client.query(
@@ -84,7 +84,6 @@ router.post('/', async (req, res) => {
             total += producto.rows[0].precio_unitario * item.cantidad;
         }
 
-        // Insertar venta
         const venta = await client.query(`
             INSERT INTO venta (fecha, total, id_cliente, id_empleado)
             VALUES (NOW(), $1, $2, $3)
@@ -93,7 +92,6 @@ router.post('/', async (req, res) => {
 
         const id_venta = venta.rows[0].id_venta;
 
-        // Insertar detalle y descontar stock
         for (const item of detalle) {
             const producto = await client.query(
                 'SELECT precio_unitario FROM producto WHERE id_producto = $1',
