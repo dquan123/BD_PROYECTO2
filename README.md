@@ -1,4 +1,4 @@
-# Proyecto 2 - Sistema de Gestión de Inventario y Ventas
+# Proyecto 3 - Sistema de Gestión de Inventario y Ventas
 
 Aplicación web para gestionar el inventario y las ventas de una tienda.
 Desarrollada con PostgreSQL, Node.js + Express y HTML/CSS/JS puro, desplegada con Docker.
