@@ -221,3 +221,12 @@ INSERT INTO detalle_venta (id_venta, id_producto, cantidad, precio_unitario) VAL
 (17, 25, 1, 750.00),
 (18, 1, 1, 4500.00),
 (19, 22, 1, 1500.00);
+
+--Usuarios con sus respectivos roles
+-- Usuarios de prueba por rol
+INSERT INTO usuario (username, password, rol) VALUES
+('usuario_admin', 'secret', 'admin'),
+('usuario_gerente', 'secret', 'gerente'),
+('usuario_vendedor', 'secret', 'vendedor'),
+('usuario_cajero', 'secret', 'cajero'),
+('usuario_bodeguero', 'secret', 'bodeguero');
