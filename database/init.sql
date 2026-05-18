@@ -86,3 +86,55 @@ FROM venta v
 JOIN cliente c ON v.id_cliente = c.id_cliente
 GROUP BY c.nombre
 ORDER BY total_gastado DESC;
+
+
+-- ROLES DE BASES DE DATOS
+
+--Roles
+CREATE ROLE rol_admin;
+CREATE ROLE rol_gerente;
+CREATE ROLE rol_vendedor;
+CREATE ROLE rol_cajero;
+CREATE ROLE rol_bodeguero;
+
+--Rol admin
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO rol_admin;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO rol_admin;
+
+--Rol gerente
+GRANT SELECT, INSERT, UPDATE ON venta TO rol_gerente;
+GRANT SELECT, INSERT, UPDATE ON detalle_venta TO rol_gerente;
+GRANT SELECT, INSERT, UPDATE, DELETE ON producto TO rol_gerente;
+GRANT SELECT, INSERT, UPDATE, DELETE ON categoria TO rol_gerente;
+GRANT SELECT, INSERT, UPDATE, DELETE ON proveedor TO rol_gerente;
+GRANT SELECT ON cliente TO rol_gerente;
+GRANT SELECT ON empleado TO rol_gerente;
+GRANT SELECT ON usuario TO rol_gerente;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO rol_gerente;
+
+--Rol vendedor
+GRANT SELECT, INSERT ON venta TO rol_vendedor;
+GRANT SELECT, INSERT ON detalle_venta TO rol_vendedor;
+GRANT SELECT ON producto TO rol_vendedor;
+GRANT SELECT ON cliente TO rol_vendedor;
+GRANT SELECT ON categoria TO rol_vendedor;
+GRANT SELECT ON proveedor TO rol_vendedor;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO rol_vendedor;
+
+--Rol cajero
+GRANT SELECT ON venta TO rol_cajero;
+GRANT SELECT ON detalle_venta TO rol_cajero;
+GRANT SELECT ON producto TO rol_cajero;
+GRANT SELECT ON cliente TO rol_cajero;
+
+--Rol bodeguero
+GRANT SELECT, UPDATE ON producto TO rol_bodeguero;
+GRANT SELECT ON categoria TO rol_bodeguero;
+GRANT SELECT ON proveedor TO rol_bodeguero;
+
+--Usuarios iniciales por rol
+CREATE USER usuario_admin WITH PASSWORD 'secret' IN ROLE rol_admin;
+CREATE USER usuario_gerente WITH PASSWORD 'secret' IN ROLE rol_gerente;
+CREATE USER usuario_vendedor WITH PASSWORD 'secret' IN ROLE rol_vendedor;
+CREATE USER usuario_cajero WITH PASSWORD 'secret' IN ROLE rol_cajero;
+CREATE USER usuario_bodeguero WITH PASSWORD 'secret' IN ROLE rol_bodeguero;
