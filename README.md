@@ -21,7 +21,7 @@ Desarrollada con PostgreSQL, Node.js + Express y HTML/CSS/JS puro, desplegada co
 
 ## Credenciales de base de datos
 
-- Usuario: proy2
+- Usuario: proy3
 - Contraseña: secret
 
 ## Usuarios de prueba
@@ -107,3 +107,62 @@ BD_PROYECTO2/
 
 - La base de datos se inicializa automáticamente con tablas y datos de prueba al correr docker compose up por primera vez
 - Para reiniciar la base de datos desde cero: docker compose down -v && docker compose up --build
+
+
+## Esquema de Roles
+
+### rol_admin
+- **Acceso:** Total a todas las tablas
+- **Operaciones:** SELECT, INSERT, UPDATE, DELETE en todas las tablas
+- **Usuario de prueba:** usuario_admin / secret
+
+### rol_gerente
+- **Tablas y operaciones:**
+  - venta: SELECT, INSERT, UPDATE
+  - detalle_venta: SELECT, INSERT, UPDATE
+  - producto: SELECT, INSERT, UPDATE, DELETE
+  - categoria: SELECT, INSERT, UPDATE, DELETE
+  - proveedor: SELECT, INSERT, UPDATE, DELETE
+  - cliente: SELECT
+  - empleado: SELECT
+  - usuario: SELECT
+- **Usuario de prueba:** usuario_gerente / secret
+
+### rol_vendedor
+- **Tablas y operaciones:**
+  - venta: SELECT, INSERT
+  - detalle_venta: SELECT, INSERT
+  - producto: SELECT
+  - cliente: SELECT
+  - categoria: SELECT
+  - proveedor: SELECT
+- **Usuario de prueba:** usuario_vendedor / secret
+
+### rol_cajero
+- **Tablas y operaciones:**
+  - venta: SELECT
+  - detalle_venta: SELECT
+  - producto: SELECT
+  - cliente: SELECT
+- **Usuario de prueba:** usuario_cajero / secret
+
+### rol_bodeguero
+- **Tablas y operaciones:**
+  - producto: SELECT, UPDATE
+  - categoria: SELECT
+  - proveedor: SELECT
+- **Usuario de prueba:** usuario_bodeguero / secret
+
+## Protección de rutas por rol
+
+| Sección | admin | gerente | vendedor | cajero | bodeguero |
+|---------|-------|---------|----------|--------|-----------|
+| Productos (ver) | ✔ | ✔ | ✔ | X | ✔ |
+| Productos (crear/editar) | ✔ | ✔ | X | X | X |
+| Productos (eliminar) | ✔ | X | X | X | X |
+| Clientes (ver) | ✔ | ✔ | X | X | X |
+| Clientes (crear/editar) | ✔ | ✔ | X | X | X |
+| Clientes (eliminar) | ✔ | X | X | X | X |
+| Ventas (ver) | ✔ | ✔ | ✔ | ✔ | X |
+| Ventas (crear) | ✔ | ✔ | ✔ | X | X |
+| Reportes | ✔ | ✔ | X | X | X |
